@@ -225,8 +225,8 @@
         totalTime = endTime;
       });
 
-      const sumAwait = processes.reduce((sum, p) => sum + p.burst, 0);
-      const avgWait = (sumAwait / processes.length).toFixed(2);
+      const sumAwait = processes.reduce((sum, p) => sum + (p.endTime - p.startTime), 0);
+      const avgWait = (totalWaitTime / processes.length).toFixed(2);
       avgWaitDisplay.textContent = `AVG WAIT: ${avgWait}ms`;
       endTimeLabel.textContent = `${totalTime}ms`;
     }
