@@ -194,39 +194,25 @@
 
       emptyMsg.classList.add('hidden');
 
-      const pendingProcesses = [...processes];
-      const scheduledProcesses = [];
+      const sortedProcesses = [...processes].sort((a, b) => {
+        if (a.burst !== b.burst) return a.burst - b.burst;
+        if (a.arrival !== b.arrival) return a.arrival - b.arrival;
+        return a.id - b.id;
+      });
 
+      const scheduledProcesses = [];
       let totalTime = 0;
       let totalWaitTime = 0;
 
-      while (pendingProcesses.length > 0) {
-        const available = pendingProcesses.filter((p) => p.arrival <= totalTime);
-
-        if (available.length === 0) {
-          const nextArrival = Math.min(...pendingProcesses.map((p) => p.arrival));
-          totalTime = nextArrival;
-          continue;
-        }
-
-        available.sort((a, b) => {
-          if (a.burst !== b.burst) return a.burst - b.burst;
-          if (a.arrival !== b.arrival) return a.arrival - b.arrival;
-          return a.id - b.id;
-        });
-
-        const proc = available[0];
-        const pendingIndex = pendingProcesses.findIndex((p) => p.id === proc.id);
-        pendingProcesses.splice(pendingIndex, 1);
-
-        const startTime = totalTime;
+      sortedProcesses.forEach((proc) => {
+        const startTime = Math.max(totalTime, proc.arrival);
         const endTime = startTime + proc.burst;
         const waitTime = startTime - proc.arrival;
 
         totalWaitTime += waitTime;
         scheduledProcesses.push({ ...proc, startTime, endTime, waitTime });
         totalTime = endTime;
-      }
+      });
 
       scheduledProcesses.forEach((proc) => {
         const startTime = proc.startTime;
